@@ -29,9 +29,9 @@ function should_be_ok_and_json(res) {
     res.should.be.json();
 }
 
-function should_be_err_equal_to(res, err_msg) {
-    should.exist(res.body.error);
-    should.equal(err_msg, res.body.error);
+function should_be_err(res) {
+    should.exist(res.body.err_code);
+    should.exist(res.body.err_msg);
 }
 
 describe('loading initial state tests', function () {
@@ -113,7 +113,7 @@ describe('loading game creation tests', function () {
         request(server).get('{0}/{1}/{2}'.format(game, gid, turn))
         .end(function(err,res){
             should_be_ok_and_json(res);
-            should_be_err_equal_to(res, 'need two players');
+            should_be_err(res);
             done();
         });
     });
@@ -122,7 +122,7 @@ describe('loading game creation tests', function () {
         request(server).get('{0}/{1}/{2}'.format(game, gid, last_move))
         .end(function(err,res){
             should_be_ok_and_json(res);
-            should_be_err_equal_to(res, 'no moves');
+            should_be_err(res);
             done();
         });
     });
@@ -141,7 +141,7 @@ describe('loading game creation tests', function () {
         request(server).post('{0}/{1}/player/{2}/move'.format(game, gid, pid)).send({move: 'e2e4'})
         .end(function(err,res){
             should_be_ok_and_json(res);
-            should_be_err_equal_to(res, 'need two players');
+            should_be_err(res);
             done();
         });
     });
@@ -150,7 +150,7 @@ describe('loading game creation tests', function () {
         request(server).get('{0}/{1}/player/{2}/bestmove'.format(game, gid, pid))
         .end(function(err,res){
             should_be_ok_and_json(res);
-            should_be_err_equal_to(res, 'need two players');
+            should_be_err(res);
             done();
         });
     });
@@ -159,7 +159,7 @@ describe('loading game creation tests', function () {
         request(server).get('{0}/{1}/player/{2}/turn'.format(game, gid, pid))
         .end(function(err,res){
             should_be_ok_and_json(res);
-            should_be_err_equal_to(res, 'need two players');
+            should_be_err(res);
             done();
         });
     });

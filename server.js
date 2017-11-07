@@ -120,7 +120,7 @@ app.post('/game/:id/join', validate_gid, validate_join_game, function(req, res) 
         return;
     }
 
-    res.status(404).json({error: "cannot join game, two players already playing"});
+    res.status(404).json(err.GAME_FULL);
 });
 
 // GET check if game over
@@ -155,7 +155,7 @@ app.get('/game/:id/last-move', validate_gid, function(req, res) {
     var history = games[game_id].game.history({verbose: true});
 
     if (history.length == 0) {
-        res.status(200).json({error: "no moves"});
+        res.status(200).json(err.NO_MOVES);
         return;
     }
 
@@ -183,7 +183,7 @@ app.post('/game/:id/player/:pid/move', validate_gid, validate_pid,
     var color = player1.id === player_id ? player1.color : player2.color;
 
     if (chess.game_over()) {
-        res.status(200).json({error: "game is over"});
+        res.status(200).json(err.GAME_OVER);
         return;
     }
 
@@ -198,11 +198,11 @@ app.post('/game/:id/player/:pid/move', validate_gid, validate_pid,
             return;
         }
 
-        res.status(200).json({error: "invalid move"});
+        res.status(200).json(err.INVALID_MOVE);
         return;
     }
 
-    res.status(200).json({error: "not your turn"});
+    res.status(200).json(err.NOT_YOUR_TURN);
 });
 
 // GET best move for player in game
@@ -229,7 +229,7 @@ app.get('/game/:id/player/:pid/bestmove', validate_gid, validate_pid,
         return;
     }
 
-    res.status(404).json({error: "not your turn"});
+    res.status(404).json(err.NOT_YOUR_TURN);
 });
 
 // GET is it this players turn?
@@ -330,7 +330,7 @@ app.get('/games/needing-opponent/:idx', function(req, res) {
         res.status(200).json(games_needing_opponent[idx]);
     }
     else {
-        res.status(404).json({error: "no such game"});
+        res.status(404).json(err.GAME_NOT_FOUND);
     }
 });
 
@@ -338,6 +338,21 @@ app.get('/games/needing-opponent/:idx', function(req, res) {
 //-----------------------------------------------
 // HELPER FUNCTIONS
 //-----------------------------------------------
+
+var err = {
+    GAME_FULL: {err_code: 27, err_msg: "two players already playing"},
+    GAME_NOT_FOUND: {err_code: 28, err_msg: "game not found"},
+    GAME_OVER: {err_code: 29, err_msg: "game is over"},
+
+    NEED_TWO_PLAYERS: {err_code: 56, err_msg: "need two players"},
+    PLAYER_NOT_IN_GAME: {err_code: 57, err_msg: "player not in game"},
+    PLAYER_TYPE_REQURIED: {err_code: 58, err_msg: "player type required"},
+    NOT_YOUR_TURN: {err_code: 59, err_msg: "not your turn"},
+
+    MOVE_REQUIRED: {err_code: 97, err_msg: "move required"},
+    NO_MOVES: {err_code: 98, err_msg: "no moves"},
+    INVALID_MOVE: {err_code: 99, err_msg: "invalid move"}
+};
 
 String.prototype.format = function() {
   var a = this;
@@ -441,7 +456,7 @@ function both_players_ready(game_id) {
 function validate_two_players(req, res, next) {
     var game_id = req.params.id;
     if (!both_players_ready(game_id)) {
-        res.status(200).json({error: "need two players"});
+        res.status(200).json(err.NEED_TWO_PLAYERS);
         next('route');
         return;
     }
@@ -452,7 +467,7 @@ function validate_pid(req, res, next) {
     var game_id = req.params.id;
     var player_id = req.params.pid;
     if (!valid_player(game_id, player_id)) {
-        res.status(404).json({error: "player not in game"});
+        res.status(404).json(err.PLAYER_NOT_IN_GAME);
         next('route');
         return;
     }
@@ -462,7 +477,7 @@ function validate_pid(req, res, next) {
 function validate_gid(req, res, next) {
     var game_id = req.params.id;
     if (!valid_game(game_id)) {
-        res.status(404).json({error: "game not found"});
+        res.status(404).json(err.GAME_NOT_FOUND);
         next('route');
         return;
     }
@@ -471,7 +486,7 @@ function validate_gid(req, res, next) {
 
 function validate_move(req, res, next) {
     if (!req.body.move) {
-        res.status(200).json({error: "move required"});
+        res.status(200).json(err.MOVE_REQUIRED);
         next('route');
         return;
     }
@@ -480,7 +495,7 @@ function validate_move(req, res, next) {
 
 function validate_create_game(req, res, next) {
     if (!req.body.player_type) {
-        res.status(200).json({error: "player_type required"});
+        res.status(200).json(err.PLAYER_TYPE_REQURIED);
         next('route');
         return;
     }
@@ -504,7 +519,7 @@ app.get('/reg', function(req, res) {
         players.push(player_id);
         console.log("player %s has joined", player_id);
     } else {
-        res.status(404).json({error: "two players already exist"});
+        res.status(404).json(err.GAME_FULL);
     }
 });
 
