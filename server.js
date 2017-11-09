@@ -188,6 +188,10 @@ app.post('/game/:id/player/:pid/move', validate_gid, validate_pid,
     }
 
     if (chess.turn() == color) {
+        var move = req.body.move;
+        var promotion = req.body.promotion;
+        if (promotion)
+            move = move + promotion.toLowerCase();
         var move = chess.move(req.body.move, {sloppy: true}); // need sloppy for algebraic notation
         process_end_game(games[game_id]);
         if (move) {
@@ -222,7 +226,13 @@ app.get('/game/:id/player/:pid/bestmove', validate_gid, validate_pid,
             moves_dict[moves[i].from + moves[i].to] = moves[i];
         }
         stockfish.bestmove(chess.fen(), 20, function(best_move) {
+            var promotion;
+            if (bestmove.length == 5) {
+                promotion = bestmove.charAt(4).toLowerCase();
+                bestmove = bestmove.slice(0,4);
+            }
             augment_move(moves_dict[best_move], chess);
+            moves_dict[best_move].promotion = promotion;
             res.status(200).json(moves_dict[best_move]);
         });
 
