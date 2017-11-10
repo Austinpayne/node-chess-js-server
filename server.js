@@ -66,7 +66,12 @@ app.get('/', function(req, res) {
 app.post('/game', validate_create_game, function(req, res) {
     var player_type = req.body.player_type;
     var opponent_type = req.body.opponent_type; // optional, default human
-    var chess = new Chess();
+    var start = req.body.start; // optional, start position FEN
+    var chess;
+    if (start)
+        chess = new Chess(start);
+    else
+        chess = new Chess();
     var game = {id: gen_id()};
     game.created  = Date.now();
     game.game = chess;
@@ -227,9 +232,9 @@ app.get('/game/:id/player/:pid/bestmove', validate_gid, validate_pid,
         }
         stockfish.bestmove(chess.fen(), 20, function(best_move) {
             var promotion;
-            if (bestmove.length == 5) {
-                promotion = bestmove.charAt(4).toLowerCase();
-                bestmove = bestmove.slice(0,4);
+            if (best_move.length == 5) {
+                promotion = best_move.charAt(4).toLowerCase();
+                best_move = best_move.slice(0,4);
             }
             augment_move(moves_dict[best_move], chess);
             moves_dict[best_move].promotion = promotion;
