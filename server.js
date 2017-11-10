@@ -542,8 +542,13 @@ app.get('/reg', function(req, res) {
 // APP START
 //-----------------------------------------------
 
+var port = 30300;
+var args = process.argv.slice(2); // throw away 'node' and program arg
+if (args.length == 1)
+    port = parseInt(args[0])
+
 // start server
-var server = app.listen(3000, "0.0.0.0", function() {
+var server = app.listen(port, "0.0.0.0", function() {
     var host = server.address().address;
     var port = server.address().port;
     
