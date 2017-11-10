@@ -232,9 +232,13 @@ app.get('/game/:id/player/:pid/bestmove', validate_gid, validate_pid,
         }
         stockfish.bestmove(chess.fen(), 20, function(best_move) {
             var promotion;
-            if (best_move.length == 5) {
+            if (if best_move && best_move.length == 5) {
                 promotion = best_move.charAt(4).toLowerCase();
                 best_move = best_move.slice(0,4);
+            }
+            if (!moves_dict[best_move]) {
+                res.status(404).json(err.NO_MOVES);
+                return;
             }
             augment_move(moves_dict[best_move], chess);
             moves_dict[best_move].promotion = promotion;
