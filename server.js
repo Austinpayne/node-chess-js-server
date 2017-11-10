@@ -232,7 +232,7 @@ app.get('/game/:id/player/:pid/bestmove', validate_gid, validate_pid,
         }
         stockfish.bestmove(chess.fen(), 20, function(best_move) {
             var promotion;
-            if (if best_move && best_move.length == 5) {
+            if (best_move && best_move.length == 5) {
                 promotion = best_move.charAt(4).toLowerCase();
                 best_move = best_move.slice(0,4);
             }
