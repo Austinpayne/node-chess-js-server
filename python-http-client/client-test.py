@@ -1,8 +1,24 @@
 import requests
 import time
 import json
+import sys
 
-server = 'http://localhost:3000'
+server = 'localhost';
+port = '30300';
+if len(sys.argv) >= 2:
+    server = str(sys.argv[1])
+if len(sys.argv) >= 3:
+    port = str(sys.argv[2])
+
+server = 'http://' + server + ':' + port
+promo_start ='2kr4/ppp2pp1/2p5/2b2b2/2P1pPPq/1P2P3/PBQPB1p1/RN1K1R2 b - - 3 17'
+
+def get_json(req):
+    try:
+        return req.json()
+    except ValueError:
+        print("failed to decode json");
+        return
 
 def json_print(j):
     print(json.dumps(j, indent=4))
@@ -21,10 +37,20 @@ def make_best_move(gid, pid):
         json_print(b.json())
         print("cannot get best move")
         return
-    
-    bestmove = b.json()['bestmove']
-    print("bestmove={}".format(bestmove));
-    move_res = post_json('{}/game/{}/player/{}/move'.format(server, gid, pid), {"move": str(bestmove)})
+
+    b_json = get_json(b)
+    if b_json:
+        bestmove = b_json.get('move')
+        promotion = b_json.get('promotion')
+    else:
+        return
+
+    print("bestmove={}".format(bestmove))
+    print("promotion={}".format(promotion))
+    move = {"move": str(bestmove)}
+    if promotion:
+        move["promotion"] = str(promotion)
+    move_res = post_json('{}/game/{}/player/{}/move'.format(server, gid, pid), move)
     if move_res:
         json_print(move_res)
     else:
@@ -37,7 +63,7 @@ player_id = ''
 games = requests.get('{}/games/needing-opponent'.format(server))
 if games.ok:
     if not games.json(): # if no game, create it
-        game = post_json('{}/game'.format(server), {"player_type":"ai"})
+        game = post_json('{}/game'.format(server), {"player_type":"ai", "start": promo_start})
         if game:
             json_print(game)
             player_id = game['player1']['id']
@@ -67,11 +93,8 @@ if games.ok:
             exit()
         turn = requests.get('{}/game/{}/player/{}/turn'.format(server, game_id, player_id))
         if turn.ok:
-            json_print(turn.json())
             if turn.json().get('turn'):
                 make_best_move(game_id, player_id)
-            else:
-                print("waiting...")
         else:
             print(turn.status_code)
             print(turn.reason)

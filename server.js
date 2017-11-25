@@ -72,7 +72,12 @@ app.get('/', function(req, res) {
 app.post('/game', validate_create_game, function(req, res) {
     var player_type = req.body.player_type;
     var opponent_type = req.body.opponent_type; // optional, default human
-    var chess = new Chess();
+    var start = req.body.start; // optional, start position FEN
+    var chess;
+    if (start)
+        chess = new Chess(start);
+    else
+        chess = new Chess();
     var game = {id: gen_id()};
     game.created  = Date.now();
     game.last_move_time = Date.now();
@@ -170,7 +175,7 @@ app.post('/game/:id/join', validate_gid, validate_join_game, function(req, res) 
         return;
     }
 
-    res.status(404).json({error: "cannot join game, two players already playing"});
+    res.status(404).json(err.GAME_FULL);
 });
 
 // POST game result if game over
@@ -189,7 +194,8 @@ app.get('/game/:id/game-over', validate_gid, function(req, res) {
 // GET game result (win, draw, etc.)
 app.get('/game/:id/result', validate_gid, function(req, res) {
     var game_id = req.params.id;
-    res.status(200).json({result: games[game_id].result});
+    var result = games[game_id].result ? games[game_id].result : null;
+    res.status(200).json({result: result});
 });
 
 // GET player object of player who's turn it is
@@ -211,18 +217,19 @@ app.get('/game/:id/last-move', validate_gid, function(req, res) {
     var history = games[game_id].game.history({verbose: true});
 
     if (history.length == 0) {
-        res.status(404).json({error: "no moves"});
+        res.status(200).json(err.NO_MOVES);
         return;
     }
 
     var last_move = history[history.length-1];
-    res.status(200).json({last_move: last_move.from + last_move.to, last_move_time: games[game_id].last_move_time});
+    augment_move(last_move);
+    res.status(200).json(last_move);
 });
 
 // GET game fen
 app.get('/game/:id/fen', validate_gid, function(req, res) {
     var game_id = req.params.id;
-    res.status(200).json(games[game_id].game.fen());
+    res.status(200).json({fen: games[game_id].game.fen()});
 });
 
 // POST move by player to game
@@ -240,20 +247,29 @@ app.post('/game/:id/player/:pid/move', validate_gid, validate_pid,
     var color = player1.id === player_id ? player1.color : player2.color;
 
     if (chess.game_over()) {
-        res.status(200).json({error: "game is over"});
+        res.status(200).json(err.GAME_OVER);
         return;
     }
 
     if (chess.turn() == color) {
+        var move = req.body.move;
+        var promotion = req.body.promotion;
+        if (promotion)
+            move = move + promotion.toLowerCase();
         var move = chess.move(req.body.move, {sloppy: true}); // need sloppy for algebraic notation
         process_end_game(games[game_id]);
-        res.status(200).json({game: games[game_id], move: move}); // send back move
-        games[game_id].last_move_time = Date.now();
-        console.log(chess.ascii());
+        if (move) {
+            augment_move(move, games[game_id]);
+            res.status(200).json({game: games[game_id], move: move}); // send back move
+            games[game_id].last_move = Date.now();
+            console.log(chess.ascii());
+            return;
+        }
+        res.status(200).json(err.INVALID_MOVE);
         return;
     }
 
-    res.status(200).json({error: "not your turn"});
+    res.status(200).json(err.NOT_YOUR_TURN);
 });
 
 // GET best move for player in game
@@ -273,16 +289,27 @@ app.get('/game/:id/player/:pid/bestmove', validate_gid, validate_pid,
             moves_dict[moves[i].from + moves[i].to] = moves[i];
         }
         stockfish.bestmove(chess.fen(), 20, function(best_move) {
+            var promotion;
+            if (best_move && best_move.length == 5) {
+                promotion = best_move.charAt(4).toLowerCase();
+                best_move = best_move.slice(0,4);
+            }
+            if (!moves_dict[best_move]) {
+                res.status(404).json(err.NO_MOVES);
+                return;
+            }
             augment_move(moves_dict[best_move], chess);
+            moves_dict[best_move].promotion = promotion;
             res.status(200).json(moves_dict[best_move]);
         });
 
         return;
     } else { // if ( end turn situation) 
         console.log("Chess turn not a color: " + chess.turn());
-        res.status(404).json({error: "not your turn"});
+        res.status(404).json(err.NOT_YOUR_TURN);
     }
 
+    res.status(404).json(err.NOT_YOUR_TURN);
 });
 
 // GET is it this players turn?
@@ -391,7 +418,7 @@ app.get('/games/needing-opponent/:idx', function(req, res) {
         res.status(200).json(games_needing_opponent[idx]);
     }
     else {
-        res.status(404).json({error: "no such game"});
+        res.status(404).json(err.GAME_NOT_FOUND);
     }
 });
 
@@ -399,6 +426,21 @@ app.get('/games/needing-opponent/:idx', function(req, res) {
 //-----------------------------------------------
 // HELPER FUNCTIONS
 //-----------------------------------------------
+
+var err = {
+    GAME_FULL: {err_code: 27, err_msg: "two players already playing"},
+    GAME_NOT_FOUND: {err_code: 28, err_msg: "game not found"},
+    GAME_OVER: {err_code: 29, err_msg: "game is over"},
+
+    NEED_TWO_PLAYERS: {err_code: 56, err_msg: "need two players"},
+    PLAYER_NOT_IN_GAME: {err_code: 57, err_msg: "player not in game"},
+    PLAYER_TYPE_REQURIED: {err_code: 58, err_msg: "player type required"},
+    NOT_YOUR_TURN: {err_code: 59, err_msg: "not your turn"},
+
+    MOVE_REQUIRED: {err_code: 97, err_msg: "move required"},
+    NO_MOVES: {err_code: 98, err_msg: "no moves"},
+    INVALID_MOVE: {err_code: 99, err_msg: "invalid move"}
+};
 
 String.prototype.format = function() {
   var a = this;
@@ -460,16 +502,16 @@ function augment_move(move, game) {
     }else if (move.flags.includes('p')) { // pawn promotion
         move.promotion = 'q'
     }
-
-
     move.move = move.from + move.to; // add long alebraic move
-    if (move.extra_from && move.extra_to)
+    if (move.extra_from && move.extra_to) {
         move.extra_move = move.extra_from + move.extra_to
+    }
 }
 
 function create_player(player_type, color, player_name) {
-    if (player_type === 'ai')
+    if (player_type === 'ai') {
         return {id: gen_id(), color: color, type: 'ai', name: player_name};
+    }
     return {id: gen_id(), color: color, type: 'human', name: player_name}; // else create human
 }
 
@@ -507,7 +549,7 @@ function both_players_ready(game_id) {
 function validate_two_players(req, res, next) {
     var game_id = req.params.id;
     if (!both_players_ready(game_id)) {
-        res.status(200).json({error: "need two players"});
+        res.status(200).json(err.NEED_TWO_PLAYERS);
         next('route');
         return;
     }
@@ -518,7 +560,7 @@ function validate_pid(req, res, next) {
     var game_id = req.params.id;
     var player_id = req.params.pid;
     if (!valid_player(game_id, player_id)) {
-        res.status(302).json({error: "player not in game"});
+        res.status(404).json(err.PLAYER_NOT_IN_GAME);
         next('route');
         return;
     }
@@ -528,8 +570,7 @@ function validate_pid(req, res, next) {
 function validate_gid(req, res, next) {
     var game_id = req.params.id;
     if (!valid_game(game_id)) {
-        console.log("Not found with id: " + game_id)
-        res.status(303).json({error: "game not found"});
+        res.status(404).json(err.GAME_NOT_FOUND);
         next('route');
         return;
     }
@@ -538,8 +579,7 @@ function validate_gid(req, res, next) {
 
 function validate_move(req, res, next) {
     if (!req.body.move) {
-        console.log(req)
-        res.status(301).json({error: "move required"});
+        res.status(200).json(err.MOVE_REQUIRED);
         next('route');
         return;
     }
@@ -548,7 +588,7 @@ function validate_move(req, res, next) {
 
 function validate_create_game(req, res, next) {
     if (!req.body.player_type) {
-        res.status(200).json({error: "player_type required"});
+        res.status(200).json(err.PLAYER_TYPE_REQURIED);
         next('route');
         return;
     }
@@ -581,7 +621,7 @@ app.get('/reg', function(req, res) {
         players.push(player_id);
         console.log("player %s has joined", player_id);
     } else {
-        res.status(404).json({error: "two players already exist"});
+        res.status(404).json(err.GAME_FULL);
     }
 });
 
@@ -589,13 +629,20 @@ app.get('/reg', function(req, res) {
 // APP START
 //-----------------------------------------------
 
+var port = 30300;
+var args = process.argv.slice(2); // throw away 'node' and program arg
+if (args.length >= 1)
+    port = parseInt(args[0])
+
 // start server
-var server = app.listen(3000, "0.0.0.0", function() {
+var server = app.listen(port, "0.0.0.0", function() {
     var host = server.address().address;
     var port = server.address().port;
     
     console_log("rest api server listening at http://{0}:{1}".format(host, port));
 });
+
+module.exports = server;
 
 /*
 var telnet_server = net.createServer(function(socket) {
