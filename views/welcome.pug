@@ -20,8 +20,9 @@ block content
       select(name="game", onchange="onselection(this.value)") Current Games
         option(value="") New Game
         for game, id in games
-          - var display = game.player1.name || game.id
-          option(value=id)= display
+          if game.result === "?"
+            - var display = game.player1.name || game.id
+            option(value=id)= display
       button#refresh-btn.pure-button(type="button", class='button', onclick='refreshGames()') Refresh Games     
       br
       button.create-game-btn.pure-button(type="submit") Create Game

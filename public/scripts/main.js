@@ -193,9 +193,9 @@ window.onload = function() {
    
 }
 
-window.onbeforeunload = function() {
+/*window.onbeforeunload = function() {
     return 'You have unsaved changes!';
-}
+}*/
 
 var countdownTimer = function(game){
 	// Update the count down every 1 second
