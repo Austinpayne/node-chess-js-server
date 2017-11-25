@@ -631,7 +631,7 @@ app.get('/reg', function(req, res) {
 // APP START
 //-----------------------------------------------
 
-var port = 30300;
+var port = process.env.PORT || 30300; 
 var args = process.argv.slice(2); // throw away 'node' and program arg
 if (args.length >= 1)
     port = parseInt(args[0])
