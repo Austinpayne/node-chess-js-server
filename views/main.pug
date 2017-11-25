@@ -1,15 +1,14 @@
-html
-  include includes/head.pug
-  body
-    .container 
-     
-      
-      .board-wrapper.center
-        .header
-          h3 Let's play!
-          #loading Waiting for opponenet
-        #board.center
-        #message.center
-        #colorTurn.center
-        #countdown.center
+extends base.pug
+
+block content
+  .container.main       
+    .board-wrapper
+      .header
+        h3 Let's play!
+        #loading Waiting for opponenet
+      #board
+      #message.center
+      #colorTurn.center
+      #countdown.center
+      .start-btn-ctn
         button.start-new-game(onclick="startNewGame()") Start New Game

@@ -1,7 +1,7 @@
-- console.log("games:" + games)
-html
-  include includes/head.pug
-  body
+extends base.pug
+
+block content
+  .container.welcome
     h1 Welcome to AKKA Chess!
     form.pure-form.pure-form-aligned(action="/setup", onsubmit="return validateForm(this)")
       p What is your name?

@@ -1,6 +1,5 @@
-.board-wrapper {
-	height : 1000px;
-	width : 1000px;
+body {
+  background-color: cornsilk;
 }
 
 .highlight-white {
@@ -51,4 +50,30 @@
 
 .name-text{
   margin-left: 10px;
+}
+
+.welcome h1 {
+  text-align: center;
+}
+
+.container.welcome {
+  margin: 0px auto;
+  width: 70%;
+}
+
+.board-wrapper {
+  width: 80%;
+  margin: 0px auto;
+}
+
+.content {
+  border: 2px solid #8b4513;
+  border-radius: 10%;
+  min-height: 90%;
+  margin: 5%;
+  background-color : white;
+}
+
+#message {
+  text-align: center;
 }
