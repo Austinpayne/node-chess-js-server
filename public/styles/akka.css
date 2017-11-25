@@ -1,0 +1,54 @@
+.board-wrapper {
+	height : 1000px;
+	width : 1000px;
+}
+
+.highlight-white {
+  -webkit-box-shadow: inset 0 0 3px 3px yellow;
+  -moz-box-shadow: inset 0 0 3px 3px yellow;
+  box-shadow: inset 0 0 3px 3px yellow;  
+}
+.highlight-black {
+  -webkit-box-shadow: inset 0 0 3px 3px blue;
+  -moz-box-shadow: inset 0 0 3px 3px blue;
+  box-shadow: inset 0 0 3px 3px blue;  
+}
+
+.center {
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+}
+
+.header {
+	text-align: center;
+}
+
+#refresh-btn {
+	margin-left: 23px;
+  font-size: 80%;
+}
+
+.ai-radio{
+  margin-left: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.human-radio{
+  margin-left: 20px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.create-game-btn{
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 120%;
+  background: rgb(28, 184, 65); 
+  color: white;
+}
+
+.name-text{
+  margin-left: 10px;
+}

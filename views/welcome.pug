@@ -1,0 +1,28 @@
+- console.log("games:" + games)
+html
+  include includes/head.pug
+  body
+    h1 Welcome to AKKA Chess!
+    form.pure-form.pure-form-aligned(action="/setup", onsubmit="return validateForm(this)")
+      p What is your name?
+
+      label(for="pname") Name
+      input.name-text(type="text", name="pname", id="pname")
+
+      p Select game type 
+      .player-type
+        input.ai-radio(type="radio", name="ptype", value="human" id="human" checked="checked")
+        label(for="human") Human
+        input.human-radio(type="radio", name="ptype", id="ai", value="ai")
+        label(for="ai") AI
+      
+      p Select an opponent or create a new game and someone will join shortly
+      select(name="game") Current Games
+        option(value="") New Game
+        for game, id in games
+          - var display = game.player1.name || game.id
+          option(value=id)= display
+      button#refresh-btn.pure-button(type="button", class='button', onclick='refreshGames()') Refresh Games     
+      br
+      button.create-game-btn.pure-button(type="submit") Create Game
+
