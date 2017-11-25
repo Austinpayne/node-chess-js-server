@@ -17,7 +17,7 @@ block content
         label(for="ai") AI
       
       p Select an opponent or create a new game and someone will join shortly
-      select(name="game") Current Games
+      select(name="game", onchange="onselection(this.value)") Current Games
         option(value="") New Game
         for game, id in games
           - var display = game.player1.name || game.id

@@ -9,6 +9,14 @@ function validateForm(form) {
 	return !!form.ptype.value;
 }
 
+function onselection(selectedValue) {
+	if(selectedValue) {
+		$(".create-game-btn").text("Join Game");
+	} else {
+		$(".create-game-btn").text("Create Game");
+	}
+}
+
 function refreshGames() {
 		api.findGames(function(games) {	
 		var $select = $("select");
