@@ -61,16 +61,6 @@ var api =  {
 		
 	},
 
-	gameOver : function(id, gameResult, onSuccess, onFailure) {
-		$.ajax({
-			url : "/game/" + id + "/game-over",
-			method: "POST",
-			data : {"game_result" : gameResult},
-			success : onSuccess,
-			error : logFailure(onFailure)
-		})
-		
-	},
 
 	lastMoveTime : function(id, onSuccess, onFailure) {
 		$.ajax({
@@ -92,6 +82,18 @@ var api =  {
 			error : logFailure(onFailure)
 		});
 	},
+
+	gameOver : function(id, gameResult, onSuccess, onFailure) {
+		$.ajax({
+			url : "/game/" + id + "/game-over",
+			method: "POST",
+			data : JSON.stringify({"gameResult" : gameResult}),
+			success : onSuccess,
+			error : logFailure(onFailure),
+			contentType : "application/json"
+		})
+	},
+
 
 	makeMove : function(id, playerid, move, onSuccess) {
 		$.ajax({

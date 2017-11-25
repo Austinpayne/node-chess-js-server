@@ -80,7 +80,7 @@ app.post('/game', validate_create_game, function(req, res) {
         chess = new Chess();
     var game = {id: gen_id()};
     game.created  = Date.now();
-    game.last_move_time = Date.now();
+    game.last_move_time = undefined; // game created shouldn't have a last move.
     game.game = chess;
     game.player1 = create_player(player_type, 'w');
     if (opponent_type === 'ai') {
@@ -107,6 +107,7 @@ app.get('/setup', function(req, res, next) {
             params.playerid = game.player2.id
             params.user = "b";
             game.result = "*";
+            game.last_move_time = (Date.now()) - 1000, // minus a second on the start 
             console.log("player %s joined game %s", params.playerid, game.id);
         } else {
             res.status(301).send("game not found");
@@ -115,7 +116,7 @@ app.get('/setup', function(req, res, next) {
         var game = {
             id : gen_id(),
             created : Date.now(),
-            last_move_time: Date.now(),
+            last_move_time: undefined, // no moves yet!
             game : new Chess(),
             player1 : create_player(player_type, 'w', player_name),
             result : "?", // waiting
@@ -180,7 +181,8 @@ app.post('/game/:id/join', validate_gid, validate_join_game, function(req, res) 
 
 // POST game result if game over
 app.post('/game/:id/game-over', validate_gid, function(req, res) {
-    games[game_id].result = req.body.gameResult;
+    console.log("result: " + JSON.stringify(req.body));
+    games[req.params.id].result = req.body.gameResult;
     res.status(200).json({error: "game is over"});
     return;
 });
@@ -261,7 +263,7 @@ app.post('/game/:id/player/:pid/move', validate_gid, validate_pid,
         if (move) {
             augment_move(move, games[game_id]);
             res.status(200).json({game: games[game_id], move: move}); // send back move
-            games[game_id].last_move = Date.now();
+            games[game_id].last_move_time = Date.now();
             console.log(chess.ascii());
             return;
         }

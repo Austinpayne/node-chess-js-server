@@ -9,8 +9,9 @@ var lastMoveTime = null;
 var Player = null;
 var $board = null;
 var urlParams = new URLSearchParams(window.location.search);
+var GameLoopId = null;
 
-const COUNTDOWNTIME = 20;
+const COUNTDOWNTIME = 60;
 
 window.onresize = function(){
 	board.resize();
@@ -29,7 +30,7 @@ function pollForPlayerTwo(gameid) {
 				gameloop();
 			}
 		})
-	}, 5000)
+	}, 1000)
 }
 
 function gameloop() {
@@ -45,28 +46,30 @@ function gameloop() {
 		$("#colorTurn").html(displayTurn + "'s turn!");
 		if(!(Game.result === "*" || Game.result === "?")) {
 			console.log("game over! - game state: " + Game.result);
-			gameover();
+			gameover(Game.result);
 		} else if(Game.game.turn.startsWith(Player.color))  {
 			Player.takeTurn(updateGame);
 		} else {
-			setTimeout(gameloop, 50);
+			GameLoopId = setTimeout(gameloop, 50);
 		}
 	});
 }
 
-function gameover() {
+function gameover(result) {
 	var $message = $("#message");
 	$("#colorTurn").remove();
 	$("#countdown").remove();
-	if(Game.result === "1/2-1/2") {
+	if(result === "1/2-1/2") {
 		$message.html("It's a tie!");
-	} else if(Game.result === "1-0") {
+	} else if(result === "1-0") {
 		$message.html("White wins!");
-	} else if(Game.result === "0-1") {
+	} else if(result === "0-1") {
 		$message.html("Black wins!");
 	} else {
 		$message.html("Unknown state: " + Game.result);
 	}
+
+	clearTimeout(GameLoopId); // kills the loop!
 }
 
 /**
@@ -190,14 +193,13 @@ window.onload = function() {
    
 }
 
-window.onbeforeunload = function () { 
-	return "Are you sure you want to leave? This will cause you to lose the game?";
+window.onbeforeunload = function() {
+    return 'You have unsaved changes!';
 }
-
 
 var countdownTimer = function(game){
 	// Update the count down every 1 second
-	var x = setInterval(function() {
+	var countdownTimerId = setInterval(function() {
 		// Get todays date and time
 		var now = new Date().getTime();
 
@@ -213,24 +215,20 @@ var countdownTimer = function(game){
 
 		// If the count down is finished, write some text 
 		if (timeLeft < 0) {
-			var result;
-			if(game.game.turn=== 'w')
-				result === "0-1";
-			else 
-				result === "1-0";
 			$("#countdown").html("TIME IS UP!");
-		    api.gameOver(game.id, {gameResult : result}, function(gamestate) {
-		    	gameover();
-			});
+			var result = Game.game.turn === 'w' ? "0-1" : "1-0";
+		    api.gameOver(urlParams.get("gameid"), result, function(gamestate) {
+		    	clearInterval(countdownTimerId);
+		    	gameover(result) // pass in loser to make it cleaner.
+			})
 		}
   	}, 100);
 }
 
 function startNewGame(form) {
-	api.getHome(function onSuccess(gameres) {
-		api.gameOver(game.id, {gameResult : result}, function(gamestate) {
-		    	gameover();
-		});
-		//send ui back to home
+	var result = Player.color === 'w' ? "0-1" : "1-0";
+	api.gameOver(urlParams.get("gameid"), result, function(gamestate) {
+	    gameover();
+	    window.location = "/";
 	});
 }
