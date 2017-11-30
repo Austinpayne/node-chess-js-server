@@ -12,7 +12,7 @@ var $board = null;
 var urlParams = new URLSearchParams(window.location.search);
 var GameLoopId = null;
 
-const COUNTDOWNTIME = 99999;
+const COUNTDOWNTIME = 45;
 
 window.onresize = function(){
 	board.resize();
