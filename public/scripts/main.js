@@ -217,6 +217,7 @@ var countdownTimer = function(game){
 		var timeLeft = COUNTDOWNTIME - totalSeconds
 
 		// Display the result 
+		$(".countdown .time-msg").html("TIME LEFT: ");
 		$(".countdown .time-value").html(Math.floor(timeLeft/60) + "m " + timeLeft%60 + "s ");
 
 		// If the count down is finished, write some text 
