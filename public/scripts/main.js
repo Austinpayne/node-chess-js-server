@@ -173,6 +173,7 @@ var createBoard = function(game) {
 		onDrop : onDrop
 	}
 	board = ChessBoard('board', cfg);
+	lastMoveTime = new Date().getTime();
 	countdownTimer(Game);
 }
 
