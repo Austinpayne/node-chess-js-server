@@ -97,37 +97,58 @@ app.post('/game', validate_create_game, function(req, res) {
 app.get('/setup', function(req, res, next) {
     var params = {};
     var player_type = req.query.ptype;
-    var player_name = req.query.pname;
-    if(req.query.game) { // selected a game
-        if(games[req.query.game]) {
-            var game = games[req.query.game];
-            params.gameid = game.id
-            params.ptype = req.query.ptype
-            game.player2 = create_player(player_type,'b', player_name);
-            params.playerid = game.player2.id
-            params.user = "b";
-            game.result = "*";
-            game.last_move_time = (Date.now()) - 1000, // minus a second on the start 
-            console.log("player %s joined game %s", params.playerid, game.id);
-        } else {
-            res.status(301).send("game not found");
-        }
-    } else { // create a game
+    if(player_type == 'ai')
+    {
         var game = {
             id : gen_id(),
             created : Date.now(),
-            last_move_time: undefined, // no moves yet!
+            last_move_time: Date.now(), // no moves yet!
             game : new Chess(),
-            player1 : create_player(player_type, 'w', player_name),
-            result : "?", // waiting
+            player1 : create_player('human', 'w', player_name),
+            player2 : create_player('ai', 'b'),
+            result : "*", // waiting
         }
-        games[game.id] = game;
-        params.gameid = game.id;
-        params.user = "w";
-        params.ptype = req.query.ptype
-        params.playerid = game.player1.id
+            games[game.id] = game;
+            params.gameid = game.id;
+            params.user = "w";
+            params.ptype = 'human';
+            params.playerid = game.player1.id;
+            // if we're play an AI, send down AI's pid
+            params.player2id = game.player2.id;
+    }
+    else{
+        var player_name = req.query.pname;
+        if(req.query.game) { // selected a game
+            if(games[req.query.game]) {
+                var game = games[req.query.game];
+                params.gameid = game.id
+                params.ptype = req.query.ptype
+                game.player2 = create_player(player_type,'b', player_name);
+                params.playerid = game.player2.id
+                params.user = "b";
+                game.result = "*";
+                game.last_move_time = (Date.now()) - 1000, // minus a second on the start 
+                console.log("player %s joined game %s", params.playerid, game.id);
+            } else {
+                res.status(301).send("game not found");
+            }
+        } else { // create a game
+            var game = {
+                id : gen_id(),
+                created : Date.now(),
+                last_move_time: undefined, // haven't established game yet
+                game : new Chess(),
+                player1 : create_player(player_type, 'w', player_name),
+                result : "?", // waiting
+            }
+            games[game.id] = game;
+            params.gameid = game.id;
+            params.user = "w";
+            params.ptype = req.query.ptype
+            params.playerid = game.player1.id
 
-        console_log("game {0} created by {1}".format(game.id, game.player1.id));
+            console_log("game {0} created by {1}".format(game.id, game.player1.id));
+        }
     }
     var queryParams = serialize(params);
     res.redirect('/ui?' + queryParams);
@@ -307,7 +328,7 @@ app.get('/game/:id/player/:pid/bestmove', validate_gid, validate_pid,
 
         return;
     } else { // if ( end turn situation) 
-        console.log("Chess turn not a color: " + chess.turn());
+        console.log("Chess turn not a color, expected: " + chess.turn() + " but got: " + color);
         res.status(404).json(err.NOT_YOUR_TURN);
     }
 

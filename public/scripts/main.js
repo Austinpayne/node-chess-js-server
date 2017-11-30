@@ -7,11 +7,12 @@ var board = null; // the UI baord
 var userid = null;
 var lastMoveTime = null; 
 var Player = null;
+var AIPlayer = null;
 var $board = null;
 var urlParams = new URLSearchParams(window.location.search);
 var GameLoopId = null;
 
-const COUNTDOWNTIME = 60;
+const COUNTDOWNTIME = 99999;
 
 window.onresize = function(){
 	board.resize();
@@ -48,7 +49,9 @@ function gameloop() {
 			console.log("game over! - game state: " + Game.result);
 			gameover(Game.result);
 		} else if(Game.game.turn.startsWith(Player.color))  {
-			Player.takeTurn(updateGame);
+			Player.takeTurn(updateGame); 
+		} else if(Game.player2.type === 'ai')  {
+			AIPlayer.takeTurn(updateGame);
 		} else {
 			GameLoopId = setTimeout(gameloop, 50);
 		}
@@ -177,6 +180,9 @@ window.onload = function() {
 	gameid = urlParams.get("gameid");
 	userid = urlParams.get("playerid")
 	Player = PlayerFactory.getPlayer(urlParams.get('ptype'), userid, gameid, urlParams.get("user"));
+	if(urlParams.get("player2id")) {		
+		AIPlayer = PlayerFactory.getPlayer('ai', urlParams.get("player2id"), gameid, 'b');
+	}
 	$board = $("#board");
 	api.getGame(urlParams.get('gameid'), function(game) {		
 		if(game.player1 && game.player2) {
@@ -211,11 +217,11 @@ var countdownTimer = function(game){
 		var timeLeft = COUNTDOWNTIME - totalSeconds
 
 		// Display the result 
-		$("#countdown").html("TIME LEFT: " + Math.floor(timeLeft/60) + "m " + timeLeft%60 + "s ");
+		$(".countdown .time-value").html(Math.floor(timeLeft/60) + "m " + timeLeft%60 + "s ");
 
 		// If the count down is finished, write some text 
 		if (timeLeft < 0) {
-			$("#countdown").html("TIME IS UP!");
+			$(".countdown").html("TIME IS UP!");
 			var result = Game.game.turn === 'w' ? "0-1" : "1-0";
 		    api.gameOver(urlParams.get("gameid"), result, function(gamestate) {
 		    	clearInterval(countdownTimerId);

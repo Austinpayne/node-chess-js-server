@@ -4,26 +4,24 @@ block content
   .container.welcome
     h1 Welcome to AKKA Chess!
     form.pure-form.pure-form-aligned(action="/setup", onsubmit="return validateForm(this)")
-      p What is your name?
-
       label(for="pname") Name
       input.name-text(type="text", name="pname", id="pname")
 
-      p Select game type 
+      p Select opponent type 
       .player-type
-        input.ai-radio(type="radio", name="ptype", value="human" id="human" checked="checked")
+        input.ai-radio(type="radio", name="ptype", value="human" id="human" checked="checked" onchange="onToggle(this.value)")
         label(for="human") Human
-        input.human-radio(type="radio", name="ptype", id="ai", value="ai")
+        input.human-radio(type="radio", name="ptype", id="ai", value="ai" onchange="onToggle(this.value)")
         label(for="ai") AI
       
-      p Select an opponent or create a new game and someone will join shortly
-      select(name="game", onchange="onselection(this.value)") Current Games
-        option(value="") New Game
-        for game, id in games
-          if game.result === "?"
-            - var display = game.player1.name || game.id
-            option(value=id)= display
-      button#refresh-btn.pure-button(type="button", class='button', onclick='refreshGames()') Refresh Games     
-      br
+      .game-list
+        p Select an opponent or create a new game and someone will join shortly
+        select(name="game", onchange="onGameSelection(this.value)") Current Games
+          option(value="") New Game
+          for game, id in games
+            if game.result === "?"
+              - var display = game.player1.name || game.id
+              option(value=id)= display
+        button#refresh-btn.pure-button(type="button", class='button', onclick='refreshGames()') Refresh Games     
       button.create-game-btn.pure-button(type="submit") Create Game
 

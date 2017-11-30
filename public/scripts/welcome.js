@@ -7,12 +7,16 @@ function validateForm(form) {
 	return !!form.ptype.value;
 }
 
-function onselection(selectedValue) {
+function onGameSelection(selectedValue) {
 	if(selectedValue) {
 		$(".create-game-btn").text("Join Game");
 	} else {
 		$(".create-game-btn").text("Create Game");
 	}
+}
+
+function onToggle(selectedValue) {
+	$(".game-list").toggle(200);
 }
 
 function refreshGames() {

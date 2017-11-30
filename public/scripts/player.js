@@ -36,12 +36,7 @@ function HumanPlayer(id, gameid, color) {
 
 	self.$board = $("#board");
 	self.takeTurn = function(onFinish) {
-		// no op? 
-		// api.makeMove(self.gameId, self.playerId, {move : },
-		// 	function(gamestate) {
-		// 		onFinish(gamestate);
-		// 	});
-		// };	
+		// NO OP	
 	}
 
 }
