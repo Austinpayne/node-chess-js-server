@@ -222,7 +222,7 @@ var countdownTimer = function(game){
 
 		// If the count down is finished, write some text 
 		if (timeLeft < 0) {
-			$(".countdown .time-msg").html("TIME IS UP!");
+			$(".countdown").html("TIME IS UP!");
 			var result = Game.game.turn === 'w' ? "0-1" : "1-0";
 		    api.gameOver(urlParams.get("gameid"), result, function(gamestate) {
 		    	clearInterval(countdownTimerId);
