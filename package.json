@@ -24,7 +24,7 @@
     "express": "^4.15.5",
     "jade": "^1.11.0",
     "pug": "^2.0.0-rc.4",
-    "stockfish": "git+https://github.com/official-stockfish/Stockfish.git#master"
+    "stockfish": "^6.0.5"
   },
   "engines": {
     "node": "4.4.7",
