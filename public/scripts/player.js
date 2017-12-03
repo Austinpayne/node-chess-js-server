@@ -24,7 +24,6 @@ function AiPlayer(id, gameid, color) {
 					console.log("Best move errored out");
 				});				
 		}, 1500);
-		
 	}
 }
 
