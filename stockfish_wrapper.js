@@ -1,6 +1,30 @@
 var spawn = require('child_process').spawn;
+var stockfishnpm = require('stockfish');
 
-exports.bestmove = function(fen, level, cb) {
+function asWorker(fen, level, cb) {
+    var engine = stockfishnpm();
+     engine.onmessage = function(data) {
+        best_move = "bestmove";
+        if (data.toString().includes(best_move)) {
+            lines = data.toString().split('\n');
+            for (i=0; i<lines.length; i++) {
+                if (lines[i].includes(best_move)) {
+                    words = lines[i].split(' ');
+                    console.log("got best move %s, killing stockfish instance", words[words.indexOf(best_move)+1]);
+                    cb(words[words.indexOf(best_move)+1]);
+                }
+            }
+        }
+    }
+            
+    engine.postMessage("uci\n");
+    engine.postMessage("ucinewgame\n");
+    engine.postMessage("setoption name Skill Level value " + level + "\n");
+    engine.postMessage("position fen " + fen + "\n");
+    engine.postMessage("go\n");
+}
+
+function asSpawn(fen, level, cb) {
     var stockfish = spawn('stockfish');
 
     stockfish.write = function(str) {
@@ -36,3 +60,6 @@ exports.bestmove = function(fen, level, cb) {
     stockfish.write("position fen " + fen);
     stockfish.write("go");
 }
+
+
+exports.bestmove = asWorker;

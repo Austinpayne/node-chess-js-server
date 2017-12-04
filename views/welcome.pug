@@ -7,12 +7,12 @@ block content
       label(for="pname") Name
       input.name-text(type="text", name="pname", id="pname")
 
-      p Select opponent type 
+      p Select your opponent 
       .player-type
         input.ai-radio(type="radio", name="ptype", value="human" id="human" checked="checked" onchange="onToggle(this.value)")
-        label(for="human") Human
+        label(for="human")  A Fellow Human
         input.human-radio(type="radio", name="ptype", id="ai", value="ai" onchange="onToggle(this.value)")
-        label(for="ai") AI
+        label(for="ai")  The Turk (AI)
       
       .game-list
         p Select an opponent or create a new game and someone will join shortly
