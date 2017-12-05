@@ -11,7 +11,9 @@ if len(sys.argv) >= 3:
     port = str(sys.argv[2])
 
 server = 'http://' + server + ':' + port
-promo_start ='2kr4/ppp2pp1/2p5/2b2b2/2P1pPPq/1P2P3/PBQPB1p1/RN1K1R2 b - - 3 17'
+#promo_start ='2kr4/ppp2pp1/2p5/2b2b2/2P1pPPq/1P2P3/PBQPB1p1/RN1K1R2 b - - 3 17'
+promo_start = ""
+
 
 def get_json(req):
     try:
@@ -45,6 +47,8 @@ def make_best_move(gid, pid):
     else:
         return
 
+#    json_print(b_json)
+    print("BEST MOVE ----------")
     print("bestmove={}".format(bestmove))
     print("promotion={}".format(promotion))
     move = {"move": str(bestmove)}
@@ -56,6 +60,19 @@ def make_best_move(gid, pid):
     else:
         print("probably not your turn")
         return
+
+def get_last_move(gid):
+    m = requests.get('{}/game/{}/last-move'.format(server, gid))
+    if not m.ok:
+        json_print(m.json())
+        print("cannot get last move")
+        return
+
+    m_json = get_json(m)
+    if m_json:
+        print("LAST MOVE ----------")
+        json_print(m_json)
+    return
 
 game = {}
 game_id = ''
@@ -94,6 +111,7 @@ if games.ok:
         turn = requests.get('{}/game/{}/player/{}/turn'.format(server, game_id, player_id))
         if turn.ok:
             if turn.json().get('turn'):
+                get_last_move(game_id);
                 make_best_move(game_id, player_id)
         else:
             print(turn.status_code)
