@@ -425,14 +425,14 @@ function augment_move(move, game) {
         move.extra_to   = (move.color === 'w') ? 'f1' : 'f8';
     } else if (move.flags.includes('q')) { // queenside castling
         move.extra_from = (move.color === 'w') ? 'a1' : 'a8';
-        move.extra_from = (move.color === 'w') ? 'd1' : 'd8';
+        move.extra_to   = (move.color === 'w') ? 'd1' : 'd8';
     } else if (move.flags.includes('e')) { // en passant capture
         move.en_passant = game.history()[game.history().length-2];
     }
 
     move.move = move.from + move.to; // add long alebraic move
     if (move.extra_from && move.extra_to)
-        move.extra_move = move.extra_from + move.extra_to
+        move.extra_move = move.extra_from + move.extra_to;
 }
 
 function create_player(player_type, color) {
