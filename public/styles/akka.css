@@ -1,5 +1,6 @@
 body {
   background-color: cornsilk;
+  margin: 0px -20%
 }
 
 .highlight-white {
@@ -63,8 +64,11 @@ body {
 }
 
 .board-wrapper {
-  width: 40%;
+  width: 50%;
   margin: 0px auto;
+}
+
+#board{
 }
 
 .content {
