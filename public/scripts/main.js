@@ -200,9 +200,13 @@ window.onload = function() {
    
 }
 
-/*window.onbeforeunload = function() {
-    return 'You have unsaved changes!';
-}*/
+window.onbeforeunload = function() {
+   	 if (data_needs_saving()) {
+       return "Do you really want to leave our brilliant application?";
+   } else {
+      return;
+   }
+}
 
 var countdownTimer = function(game){
 	// Update the count down every 1 second

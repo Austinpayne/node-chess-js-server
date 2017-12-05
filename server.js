@@ -283,9 +283,10 @@ app.post('/game/:id/player/:pid/move', validate_gid, validate_pid,
         process_end_game(games[game_id]);
         if (move) {
             augment_move(move, games[game_id]);
-            res.status(200).json({game: games[game_id], move: move}); // send back move
             games[game_id].last_move_time = Date.now();
-            console.log(chess.ascii());
+            move.game = games[game_id]
+            res.status(200).json(move);
+            console.log(chess.ascii());   
             return;
         }
         res.status(200).json(err.INVALID_MOVE);
@@ -325,13 +326,10 @@ app.get('/game/:id/player/:pid/bestmove', validate_gid, validate_pid,
             moves_dict[best_move].promotion = promotion;
             res.status(200).json(moves_dict[best_move]);
         });
-
         return;
-    } else { // if ( end turn situation) 
-        console.log("Chess turn not a color, expected: " + chess.turn() + " but got: " + color);
-        res.status(404).json(err.NOT_YOUR_TURN);
-    }
+    } 
 
+    console.log("Chess turn not a color, expected: " + chess.turn() + " but got: " + color);
     res.status(404).json(err.NOT_YOUR_TURN);
 });
 
