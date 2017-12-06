@@ -239,16 +239,19 @@ function get_best_move(chess, cb) {
 
     stockfish.bestmove(chess.fen(), 20, function(best_move) {
         var promotion;
-        if (best_move && best_move.length == 5) {
-            promotion = best_move.charAt(4).toLowerCase();
-            best_move = best_move.slice(0,4);
+        if (best_move) {
+            if (best_move.length == 5) {
+                promotion = best_move.charAt(4).toLowerCase();
+                best_move = best_move.slice(0,4);
+            }
+            if (!moves_dict[best_move]) {
+                cb(null);
+            }
+            augment_move(moves_dict[best_move], chess);
+            moves_dict[best_move].promotion = promotion;
+            cb(moves_dict[best_move]);
         }
-        if (!moves_dict[best_move]) {
-            cb(null);
-        }
-        augment_move(moves_dict[best_move], chess);
-        moves_dict[best_move].promotion = promotion;
-        cb(moves_dict[best_move]);
+        cb(null);
     });
 }
 
