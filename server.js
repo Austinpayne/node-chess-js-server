@@ -185,7 +185,15 @@ app.post('/game/:id/player/:pid/move', validate_gid, validate_pid,
     var chess =   games[game_id].game;
     var player1 = games[game_id].player1;
     var player2 = games[game_id].player2;
-    var color = player1.id === player_id ? player1.color : player2.color;
+    var color = player2.color;
+    var this_player = player2;
+    var other_player = player1;
+
+    if (player1.id === player_id) {
+        color = player1.color;
+        this_player = player1;
+        other_player = player2;
+    }
 
     if (chess.game_over()) {
         res.status(200).json(err.GAME_OVER);
@@ -204,6 +212,13 @@ app.post('/game/:id/player/:pid/move', validate_gid, validate_pid,
             res.status(200).json(move); // send back move
             games[game_id].last_move = Date.now();
             console.log(chess.ascii());
+            if (other_player.type === 'ai') {
+                get_best_move(chess, function(best_move) {
+                    if (best_move) {
+                        chess.move(best_move, {sloppy: true});
+                    }
+                });
+            }
             return;
         }
 
@@ -213,6 +228,29 @@ app.post('/game/:id/player/:pid/move', validate_gid, validate_pid,
 
     res.status(200).json(err.NOT_YOUR_TURN);
 });
+
+function get_best_move(chess, cb) {
+    var moves = chess.moves({verbose:true});
+    var moves_dict = {};
+
+    for (i=0; i< moves.length; i++) {
+        moves_dict[moves[i].from + moves[i].to] = moves[i];
+    }
+
+    stockfish.bestmove(chess.fen(), 20, function(best_move) {
+        var promotion;
+        if (best_move && best_move.length == 5) {
+            promotion = best_move.charAt(4).toLowerCase();
+            best_move = best_move.slice(0,4);
+        }
+        if (!moves_dict[best_move]) {
+            cb(null);
+        }
+        augment_move(moves_dict[best_move], chess);
+        moves_dict[best_move].promotion = promotion;
+        cb(moves_dict[best_move]);
+    });
+}
 
 // GET best move for player in game
 app.get('/game/:id/player/:pid/bestmove', validate_gid, validate_pid, 
@@ -225,26 +263,13 @@ app.get('/game/:id/player/:pid/bestmove', validate_gid, validate_pid,
     var player2 = games[game_id].player2;
     var color = player1.id === player_id ? player1.color : player2.color;
     if (chess.turn() == color) {
-        var moves = chess.moves({verbose:true});
-        var moves_dict = {};
-        for (i=0; i< moves.length; i++) {
-            moves_dict[moves[i].from + moves[i].to] = moves[i];
-        }
-        stockfish.bestmove(chess.fen(), 20, function(best_move) {
-            var promotion;
-            if (best_move && best_move.length == 5) {
-                promotion = best_move.charAt(4).toLowerCase();
-                best_move = best_move.slice(0,4);
-            }
-            if (!moves_dict[best_move]) {
+        get_best_move(chess, function(best_move) {
+            if (best_move) {
+                res.status(200).json(best_move);
+            } else {
                 res.status(404).json(err.NO_MOVES);
-                return;
             }
-            augment_move(moves_dict[best_move], chess);
-            moves_dict[best_move].promotion = promotion;
-            res.status(200).json(moves_dict[best_move]);
         });
-
         return;
     }
 
