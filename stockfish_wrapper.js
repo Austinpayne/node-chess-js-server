@@ -20,6 +20,7 @@ function asWorker(fen, level, cb) {
     engine.postMessage("uci\n");
     engine.postMessage("ucinewgame\n");
     engine.postMessage("setoption name Skill Level value " + level + "\n");
+    engine.postMessage("setoption name Contempt value " + 100 + "\n");
     engine.postMessage("position fen " + fen + "\n");
     engine.postMessage("go\n");
 }

@@ -97,6 +97,7 @@ app.post('/game', validate_create_game, function(req, res) {
 app.get('/setup', function(req, res, next) {
     var params = {};
     var player_type = req.query.ptype;
+    console.log("playertype " + player_type);
     if(player_type == 'ai')
     {
         var game = {
@@ -116,7 +117,7 @@ app.get('/setup', function(req, res, next) {
             // if we're play an AI, send down AI's pid
             params.player2id = game.player2.id;
     }
-    else{
+    else if (player_type == 'human'){
         var player_name = req.query.pname;
         if(req.query.game) { // selected a game
             if(games[req.query.game]) {
@@ -150,8 +151,19 @@ app.get('/setup', function(req, res, next) {
             console_log("game {0} created by {1}".format(game.id, game.player1.id));
         }
     }
+    else{
+        if(req.query.watchGame) { // selected a game
+            if(games[req.query.watchGame]) {
+                var game = games[req.query.watchGame];
+                params.gameid = game.id
+                params.ptype = req.query.ptype
+            }
+        }
+    }
+    
     var queryParams = serialize(params);
     res.redirect('/ui?' + queryParams);
+    
 });
 
 app.get('/ui', function(req, res, next){

@@ -12,7 +12,7 @@ var $board = null;
 var urlParams = new URLSearchParams(window.location.search);
 var GameLoopId = null;
 
-const COUNTDOWNTIME = 45;
+const COUNTDOWNTIME = 2000;
 
 window.onresize = function(){
 	board.resize();
@@ -179,13 +179,21 @@ var createBoard = function(game) {
 
 window.onload = function() {
 	gameid = urlParams.get("gameid");
-	userid = urlParams.get("playerid")
+	userid = urlParams.get("playerid");
+	ptype = urlParams.get("ptype");
 	Player = PlayerFactory.getPlayer(urlParams.get('ptype'), userid, gameid, urlParams.get("user"));
 	if(urlParams.get("player2id")) {		
 		AIPlayer = PlayerFactory.getPlayer('ai', urlParams.get("player2id"), gameid, 'b');
 	}
 	$board = $("#board");
-	api.getGame(urlParams.get('gameid'), function(game) {		
+	api.getGame(urlParams.get('gameid'), function(game) {	
+		if(ptype == 'watch'){
+			createBoard(game);
+			$("#loading").remove();
+			$(".start-new-game").remove();
+	        gameloop();
+	        return;
+		}	
 		if(game.player1 && game.player2) {
 			createBoard(game);
         	$("#loading").remove();
@@ -196,16 +204,6 @@ window.onload = function() {
     }, function onFail() {
     	$("#loading").html("Game not found");
     });
-
-   
-}
-
-window.onbeforeunload = function() {
-   	 if (data_needs_saving()) {
-       return "Do you really want to leave our brilliant application?";
-   } else {
-      return;
-   }
 }
 
 var countdownTimer = function(game){
@@ -240,7 +238,8 @@ var countdownTimer = function(game){
 function startNewGame(form) {
 	var result = Player.color === 'w' ? "0-1" : "1-0";
 	api.gameOver(urlParams.get("gameid"), result, function(gamestate) {
-	    gameover();
+		clearInterval(countdownTimerId);
+	    gameover(result);
 	    window.location = "/";
 	});
 }

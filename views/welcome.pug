@@ -7,13 +7,26 @@ block content
       label(for="pname") Name
       input.name-text(type="text", name="pname", id="pname")
 
-      p Select your opponent 
+      p Select game type 
       .player-type
         input.ai-radio(type="radio", name="ptype", value="human" id="human" checked="checked" onchange="onToggle(this.value)")
-        label(for="human")  A Fellow Human
+        label(for="human")  Human
         input.human-radio(type="radio", name="ptype", id="ai", value="ai" onchange="onToggle(this.value)")
         label(for="ai")  The Turk (Computer)
+        input.watch-radio(type="radio", name="ptype", id="watch", value="watch" onchange="onToggle(this.value)")
+        label(for="watch")  Observe Game
       
+      .watch-game-list
+        p Select a game to watch
+        select(name="watchGame", onchange="onWatchGameSelection(this.value)") Current Games
+          each watchgame, id in games
+            if watchgame.result === "*"
+              - var display = watchgame.player1.name || watchgame.id
+              option(value=id)= display
+          else
+            option(value="") No Current Games
+        button#refresh-btn.pure-button(type="button", class='button', onclick='watchRefreshGames()') Refresh Games
+
       .game-list
         p Select an opponent or create a new game and someone will join shortly
         select(name="game", onchange="onGameSelection(this.value)") Current Games
