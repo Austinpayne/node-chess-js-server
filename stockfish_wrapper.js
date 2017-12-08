@@ -14,6 +14,7 @@ exports.bestmove = function(fen, level, cb) {
             for (i=0; i<lines.length; i++) {
                 if (lines[i].includes(best_move)) {
                     words = lines[i].split(' ');
+                    console.log("%s", fen);
                     console.log("got best move %s, killing stockfish instance", words[words.indexOf(best_move)+1]);
                     stockfish.kill('SIGINT');
                     cb(words[words.indexOf(best_move)+1]);
@@ -33,6 +34,7 @@ exports.bestmove = function(fen, level, cb) {
     stockfish.write("uci");
     stockfish.write("ucinewgame");
     stockfish.write("setoption name Skill Level value " + level);
+    stockfish.write("setoption name Contempt value " + 100);
     stockfish.write("position fen " + fen);
     stockfish.write("go");
 }
