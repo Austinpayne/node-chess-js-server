@@ -217,12 +217,6 @@ app.post('/game/:id/player/:pid/move', validate_gid, validate_pid,
                     if (best_move) {
                         chess.move(best_move, {sloppy: true});
                         return;
-                    } else {
-                        get_best_move(chess, function(bmove) {
-                            if (bmove) {
-                                chess.move(bmove, {sloppy: true});
-                            }
-                        });
                     }
                 });
             }
@@ -253,10 +247,12 @@ function get_best_move(chess, cb) {
             }
             if (!moves_dict[best_move]) {
                 cb(null);
+                return;
             }
             augment_move(moves_dict[best_move], chess);
             moves_dict[best_move].promotion = promotion;
             cb(moves_dict[best_move]);
+            return;
         }
         cb(null);
     });
