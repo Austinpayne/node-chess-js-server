@@ -216,6 +216,7 @@ app.post('/game/:id/player/:pid/move', validate_gid, validate_pid,
                 get_best_move(chess, function(best_move) {
                     if (best_move) {
                         chess.move(best_move, {sloppy: true});
+                        return;
                     } else {
                         get_best_move(chess, function(bmove) {
                             if (bmove) {
