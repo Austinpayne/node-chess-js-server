@@ -12,7 +12,8 @@ if len(sys.argv) >= 3:
 
 server = 'http://' + server + ':' + port
 #promo_start ='2kr4/ppp2pp1/2p5/2b2b2/2P1pPPq/1P2P3/PBQPB1p1/RN1K1R2 b - - 3 17'
-promo_start = ""
+bestmove_fail = '2r1r1k1/1p3pp1/pq1p3p/3n1p2/1n1P4/NQ2PN1P/PP3PP1/2R2RK1 w - - 0 22'
+promo_start = bestmove_fail
 
 
 def get_json(req):

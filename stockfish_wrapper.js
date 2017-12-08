@@ -11,6 +11,7 @@ exports.bestmove = function(fen, level, cb) {
         best_move = "bestmove";
         if (data.toString().includes(best_move)) {
             lines = data.toString().split('\n');
+            console.log(lines);
             for (i=0; i<lines.length; i++) {
                 if (lines[i].includes(best_move)) {
                     words = lines[i].split(' ');
