@@ -80,7 +80,7 @@ player_id = ''
 games = requests.get('{}/games/needing-opponent'.format(server))
 if games.ok:
     if not games.json(): # if no game, create it
-        game = post_json('{}/game'.format(server), {"player_type":"ai", "start": promo_start})
+        game = post_json('{}/game'.format(server), {"player_type":"ai", "start": promo_start, "opponent_type": "ai"})
         if game:
             json_print(game)
             player_id = game['player1']['id']

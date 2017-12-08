@@ -15,6 +15,9 @@ exports.bestmove = function(fen, level, cb) {
                 if (lines[i].includes(best_move)) {
                     words = lines[i].split(' ');
                     console.log("%s", fen);
+                    for (j=0; j<words.length; j++) {
+                        console.log("%s", words[j]);
+                    }
                     console.log("got best move %s, killing stockfish instance", words[words.indexOf(best_move)+1]);
                     stockfish.kill('SIGINT');
                     cb(words[words.indexOf(best_move)+1]);
