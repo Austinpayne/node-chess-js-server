@@ -217,6 +217,13 @@ app.post('/game/:id/player/:pid/move', validate_gid, validate_pid,
                     if (best_move) {
                         chess.move(best_move, {sloppy: true});
                         return;
+                    } else {
+                        get_best_move(chess, function(bmove) {
+                            if (bmove) {
+                                chess.move(bmove, {sloppy: true});
+                                return;
+                            }
+                        });
                     }
                 });
             }
