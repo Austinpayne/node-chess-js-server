@@ -5,7 +5,7 @@ server.js requires node v4.4.7 (use `nvm` (https://github.com/creationix/nvm) to
 Dependencies:
 
 * chess-js: https://github.com/jhlywa/chess.js
-* epxress: https://expressjs.com/
+* express: https://expressjs.com/
 * stockfish: https://stockfishchess.org/
 
 Install node using `nvm` (see above):
